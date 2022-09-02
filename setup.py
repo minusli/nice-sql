@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
 # twine upload dist/*
 
 setup(
-    name='nicesql',
+    name='nice-sql',
     version='0.0.1',
     author='minusli',
     author_email='minusli@foxmail.com',
