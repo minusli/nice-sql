@@ -10,7 +10,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='nice-sql',
-    version='0.0.3',
+    version='0.0.4',
     author='minusli',
     author_email='minusli@foxmail.com',
     url='https://github.com/657143946/nicesql',
