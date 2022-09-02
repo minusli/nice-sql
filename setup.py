@@ -17,7 +17,7 @@ setup(
     description='easy nice sql: decorator with sql',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(include=["nicesql"]),
     python_requires='>=3',
     install_requires=[
         "pytest"
