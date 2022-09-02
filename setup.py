@@ -9,12 +9,12 @@ with open("README.md", "r") as fh:
 # twine upload dist/*
 
 setup(
-    name='minusSQL',
-    version='0.0.3',
+    name='nicesql',
+    version='0.0.1',
     author='minusli',
     author_email='minusli@foxmail.com',
-    url='https://github.com/657143946/minusSQL',
-    description='easy sql: decorator with sql',
+    url='https://github.com/657143946/nicesql',
+    description='easy nice sql: decorator with sql',
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
