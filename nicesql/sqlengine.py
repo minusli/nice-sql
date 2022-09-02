@@ -56,14 +56,15 @@ def _check_with_decorator(func):
 
 def _merge_args_kwargs_with_decorator(func, *args, **kwargs):
     func_params = inspect.getargs(func.__code__).args
-    if len(func_params) != len(args):
+    if len(func_params) < len(args):
         raise Exception(f"func({func}) define against use")
     if func_params and func_params[0] in ('self', 'cls'):
         func_params = func_params[1:]
         args = args[1:]
-    for i, k in enumerate(func_params):
+    for i, v in enumerate(args):
+        k = func_params[i]
         if k not in kwargs:
-            kwargs[k] = args[i]
+            kwargs[k] = v
     return kwargs
 
 
