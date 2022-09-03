@@ -43,6 +43,11 @@ class TestCRUDWithSelf:
     def delete(self, id: int) -> int:
         pass
 
+    # noinspection PyShadowingBuiltins
+    @nicesql.delete("delete from person where id={id}")
+    def delete_0(self, id: int = 0) -> int:
+        pass
+
     def test_insert(self):
         name = "insert001"
         new_id = self.insert(name)
@@ -60,6 +65,7 @@ class TestCRUDWithSelf:
         assert self.delete(new_id) == 1
         person = self.get(new_id)
         assert person is None
+        assert self.delete_0() == 0
 
     def test_update(self):
         name = "update001"

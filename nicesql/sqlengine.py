@@ -1,5 +1,4 @@
 import inspect
-import types
 from abc import ABCMeta, abstractmethod
 from typing import List
 
@@ -45,16 +44,15 @@ def execute(nsql: str, engine='default', **kwargs) -> SqlResult:
 
 
 def _check_with_decorator(func):
-    if not isinstance(func, types.FunctionType):
-        raise Exception(f"func({func}) must be function")
-    arguments = inspect.getargs(func.__code__)
-    if arguments.varargs:
-        raise Exception(f"func({func}) not support *args: {arguments.varargs}")
-    if arguments.varkw:
-        raise Exception(f"func({func}) not support *args: {arguments.varkw}")
+    if not callable(func):
+        raise Exception(f"func({func}) must be callable")
+    for name, param in inspect.signature(func).parameters.items():
+        if param.kind in (inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD):
+            raise Exception(f"func({func}) not support *args/**kwargs: {name}")
 
 
 def _merge_args_kwargs_with_decorator(func, *args, **kwargs):
+    # merge *args
     func_params = inspect.getargs(func.__code__).args
     if len(func_params) < len(args):
         raise Exception(f"func({func}) define against use")
@@ -65,6 +63,12 @@ def _merge_args_kwargs_with_decorator(func, *args, **kwargs):
         k = func_params[i]
         if k not in kwargs:
             kwargs[k] = v
+
+    # merge default
+    for name, param in inspect.signature(func).parameters.items():
+        if name not in kwargs and param.default != param.empty:
+            kwargs[name] = param.default
+
     return kwargs
 
 
