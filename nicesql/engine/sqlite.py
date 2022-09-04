@@ -17,7 +17,7 @@ def row2dict_factory(cursor: Cursor, row: List[Any]) -> Dict[str, Any]:
 class Sqlite(SQLEngine):
 
     def __init__(self, db: str):
-        self.conn = sqlite3.connect(db, isolation_level=None)
+        self.conn = sqlite3.connect(db, isolation_level=None, check_same_thread=False)
         self.conn.row_factory = row2dict_factory
         self.lock = threading.Lock()
 
