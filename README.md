@@ -17,7 +17,8 @@ sqlite example
 """
 
 import nicesql
-from nicesql import Sqlite, SqlModel
+from nicesql.sqlmodel import SqlModel
+from nicesql.sqlengine.sqlite import Sqlite
 from typing import List
 
 nicesql.register(Sqlite(":memory:"))
@@ -29,7 +30,7 @@ class Person(SqlModel):
         self.name = None
 
 
-@nicesql.ddl("""
+@nicesql.bind("""
     create table if not exists person(
         id      integer not null primary key,
         name    varchar(127)
