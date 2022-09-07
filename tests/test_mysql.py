@@ -15,14 +15,14 @@ class TestMysql:
         nicesql.register(Mysql(dbname="test", user="test", password="test"))
         nicesql.execute("""
             create table if not exists person(
-                id      integer not null primary key,
+                id      int not null primary key auto_increment,
                 name    varchar(127)
             )
         """)
 
     def teardown(self):
         nicesql.execute("""
-            drop table if exists person   
+            drop table if exists person
         """)
         nicesql.close()
 
