@@ -1,5 +1,5 @@
 import nicesql
-from nicesql.sqlengine.sqlite import Sqlite
+from nicesql.sqlengine.mysql import Mysql
 from nicesql.sqlmodel import SqlModel
 
 
@@ -10,9 +10,9 @@ class Person(SqlModel):
 
 
 # noinspection DuplicatedCode, PyMethodMayBeStatic, PyShadowingBuiltins
-class TestSqlite:
+class TestMysql:
     def setup(self):
-        nicesql.register(Sqlite(":memory:"))
+        nicesql.register(Mysql(dbname="test", user="test", password="test"))
         nicesql.execute("""
             create table if not exists person(
                 id      integer not null primary key,
@@ -21,6 +21,9 @@ class TestSqlite:
         """)
 
     def teardown(self):
+        nicesql.execute("""
+            drop table if exists person   
+        """)
         nicesql.close()
 
     @nicesql.insert("insert into person(name) values({name})")

@@ -3,7 +3,7 @@ import threading
 from sqlite3 import Cursor
 from typing import Any, List, Dict
 
-from nicesql.sqlengine import SQLEngine
+from nicesql.sqlengine.base import SqlEngine
 from nicesql.sqlresult import SqlResult
 
 
@@ -14,7 +14,7 @@ def row2dict_factory(cursor: Cursor, row: List[Any]) -> Dict[str, Any]:
     return d
 
 
-class Sqlite(SQLEngine):
+class Sqlite(SqlEngine):
 
     def __init__(self, db: str):
         self.conn = sqlite3.connect(db, isolation_level=None, check_same_thread=False)

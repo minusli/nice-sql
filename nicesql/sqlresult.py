@@ -23,8 +23,8 @@ class SqlResult:
             return self._rows[0]
         return model().fill(**self._rows[0])
 
-    def rowcount(self):
+    def rowcount(self) -> int:
         return self._rowcount
 
-    def insertid(self):
+    def insertid(self) -> Any:
         return self._insertid

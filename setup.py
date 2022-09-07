@@ -10,7 +10,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='nice-sql',
-    version='0.0.6',
+    version='0.0.7',
     author='minusli',
     author_email='minusli@foxmail.com',
     url='https://github.com/657143946/nicesql',
@@ -20,7 +20,9 @@ setup(
     packages=setuptools.find_packages(exclude=["tests"]),
     python_requires='>=3',
     install_requires=[
-        "pytest"
+        "pytest",
+        "pymysql",
+        "DBUtils"
     ],
     entry_points={},
     license="Apache License 2.0"
