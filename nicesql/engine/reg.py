@@ -5,7 +5,7 @@ from nicesql.engine.impl_dummy import DummyEngine
 from nicesql.engine.impl_mysql import MysqlEngine
 from nicesql.engine.impl_sqlite import SqliteEngine
 from nicesql.utils import parse_db_url
-from nicesql.utils.error import NotFoundError, UnsupportedError
+from nicesql.utils.error import NotFoundError, UnsupportedError, DuplicateError
 
 __engines: Dict[str, Engine] = {}
 __engine_type_map: Dict[str, Type[Engine]] = {
@@ -16,8 +16,8 @@ __engine_type_map: Dict[str, Type[Engine]] = {
 
 
 def reg_engine(url: str, alias="default"):
-    # if alias in __engines:
-    #     raise DuplicateError(f'engine register duplicate: alias={alias}')
+    if alias in __engines:
+        raise DuplicateError(f'engine register duplicate: alias={alias}')
 
     params = parse_db_url(url)
     engine_type = __engine_type_map.get(params["type"], "")

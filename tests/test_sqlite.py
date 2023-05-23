@@ -1,4 +1,5 @@
-import nicesql
+from typing import List
+
 from nicesql.engine import reg_engine
 from nicesql.shortcut.annotate import insert, delete, update, select, ddl
 
@@ -9,43 +10,54 @@ class Person:
         self.name = None
 
 
+def setup_module():
+    reg_engine("sqlite:///:memory:?debug=true", alias="sqlite")
+    create_table()
+
+
+def teardown_module():
+    drop_table()
+
+
+@ddl("""
+create table if not exists person(
+    id      integer not null primary key,
+    name    varchar(127)
+)
+""", engine="sqlite")
+def create_table():
+    pass
+
+
+@ddl("drop table if exists person", engine="sqlite")
+def drop_table():
+    pass
+
+
 # noinspection DuplicatedCode, PyMethodMayBeStatic, PyShadowingBuiltins
 class TestSqlite:
-    def setup(self):
-        reg_engine("sqlite:///:memory:/")
-        self.create_table()
-
-    @ddl("""
-    create table if not exists person(
-        id      integer not null primary key,
-        name    varchar(127)
-    )
-    """)
-    def create_table(self):
+    @insert("insert into person(name) values({name})", engine="sqlite")
+    def insert(self, name: str) -> int | str:
         pass
 
-    @insert("insert into person(name) values({name})")
-    def insert(self, name: str) -> int:
-        pass
-
-    @delete("delete from person where id={id}")
+    @delete("delete from person where id={id}", engine="sqlite")
     def delete(self, id: int) -> int:
         pass
 
-    @update("update person set name={name} where id={id}")
+    @update("update person set name={name} where id={id}", engine="sqlite")
     def update(self, id: int, name: str) -> int:
         pass
 
-    @select("select * from person where id={ id }", model=Person, first=True)
+    @select("select * from person where id={ id }", model=Person, first=True, engine="sqlite")
     def get(self, id: int) -> Person:
         pass
 
-    @select("select * from person where id in { ids }", model=Person)
-    def gets(self, *ids: int) -> Person:
+    @select("select * from person where id in ({ ids })", model=Person, engine="sqlite")
+    def gets(self, *ids: int) -> List[Person]:
         pass
 
-    @select("select * from person where name like { name }", model=Person)
-    def find(self, name: str) -> Person:
+    @select("select * from person where name like { name }", model=Person, engine="sqlite")
+    def find(self, name: str) -> List[Person]:
         pass
 
     def test_insert(self):
@@ -72,3 +84,15 @@ class TestSqlite:
         person = self.get(new_id)
         assert person
         assert person.name == update_name
+
+    def test_gets(self):
+        name1 = "gets001"
+        name2 = "gets002"
+        id1 = self.insert(name1)
+        id2 = self.insert(name2)
+        persons = self.gets(id1, id2)
+        assert len(persons) == 2
+        assert persons[0].id == id1
+        assert persons[1].id == id2
+        assert persons[0].name == name1
+        assert persons[1].name == name2

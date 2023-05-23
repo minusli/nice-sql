@@ -4,6 +4,7 @@ from sqlite3 import Cursor
 from typing import Any, List, Dict, Optional
 
 from nicesql import utils
+from nicesql.engine import sqlformat
 from nicesql.engine.base import Engine, Result
 
 
@@ -16,10 +17,15 @@ class SqliteEngine(Engine):
         database = kwargs.get('database')
         self.conn = sqlite3.connect(database, isolation_level=None, check_same_thread=False)
         self.conn.row_factory = _row2dict_factory
+        if kwargs.get("debug", "").lower() == "true":
+            self.conn.set_trace_callback(lambda sql: print(f"SQL: {sql}"))
 
     def execute(self, nsql: str, data: any) -> Result:
-        sql, params = utils.parse_nsql(nsql, placeholder="?")
+        sql, params = sqlformat.parse_nsql(nsql)
         params = [utils.pick_value(data, p) for p in params]
+
+        # support list
+        sql, params = sqlformat.expand_sql(sql, params)
 
         with self.lock:
             cur = self.conn.cursor()

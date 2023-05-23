@@ -5,6 +5,7 @@ import pymysql.cursors
 from dbutils.pooled_db import PooledDB
 
 from nicesql import utils
+from nicesql.engine import sqlformat
 from nicesql.engine.base import Engine, Result
 
 
@@ -26,9 +27,12 @@ class MysqlEngine(Engine):
                              cursorclass=pymysql.cursors.DictCursor, charset=charset)
 
     def execute(self, nsql: str, data: any) -> any:
-        sql, params = utils.parse_nsql(nsql)
-        params = [utils.pick_value(p, data) for p in params]
+        sql, params = sqlformat.parse_nsql(nsql)
+        params = [utils.pick_value(data, p) for p in params]
 
+        sql, params = sqlformat.expand_sql(sql, params)  # support list
+
+        sql = sql.replace("?", "%s")  # 占位符替换
         with self.pool.connection() as conn:
             cursor = conn.cursor()
             cursor.execute(sql, params)
