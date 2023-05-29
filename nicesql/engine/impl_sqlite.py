@@ -1,7 +1,7 @@
 import sqlite3
 import threading
 from sqlite3 import Cursor
-from typing import Any, List, Dict, Optional
+from typing import Any, List, Dict
 
 from nicesql import utils
 from nicesql.engine import sqlformat
@@ -9,18 +9,15 @@ from nicesql.engine.base import Engine, Result
 
 
 class SqliteEngine(Engine):
-    def __init__(self):
-        self.conn: Optional[sqlite3.Connection] = None
-        self.lock = threading.Lock()
-
-    def init(self, **kwargs):
+    def __init__(self, **kwargs):
         database = kwargs.get('database')
         self.conn = sqlite3.connect(database, isolation_level=None, check_same_thread=False)
         self.conn.row_factory = _row2dict_factory
         if kwargs.get("debug", "").lower() == "true":
             self.conn.set_trace_callback(lambda sql: print(f"SQL: {sql}"))
+        self.lock = threading.Lock()
 
-    def execute(self, nsql: str, data: any) -> Result:
+    def execute(self, nsql: str, data: Any) -> Result:
         sql, params = sqlformat.parse_nsql(nsql)
         params = [utils.pick_value(data, p) for p in params]
 

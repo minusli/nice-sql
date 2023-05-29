@@ -1,1 +1,1 @@
-from nicesql.engine.reg import reg_engine, get_engine
+from nicesql.engine.reg import register_engine, add_db, get_db

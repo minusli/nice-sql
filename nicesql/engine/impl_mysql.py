@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any
 
 import pymysql
 import pymysql.cursors
@@ -10,10 +10,7 @@ from nicesql.engine.base import Engine, Result
 
 
 class MysqlEngine(Engine):
-    def __init__(self):
-        self.pool: Optional[PooledDB] = None
-
-    def init(self, **kwargs):
+    def __init__(self, **kwargs):
         host = kwargs['host']
         port = kwargs.get('port') or 3306
         database = kwargs.get('database')
@@ -26,7 +23,7 @@ class MysqlEngine(Engine):
                              maxconnections=maxconnections, blocking=True, setsession=['SET AUTOCOMMIT = 1'],
                              cursorclass=pymysql.cursors.DictCursor, charset=charset)
 
-    def execute(self, nsql: str, data: any) -> any:
+    def execute(self, nsql: str, data: Any) -> Result:
         sql, params = sqlformat.parse_nsql(nsql)
         params = [utils.pick_value(data, p) for p in params]
 

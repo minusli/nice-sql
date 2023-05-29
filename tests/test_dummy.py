@@ -1,9 +1,23 @@
-from nicesql.engine import reg_engine
+from typing import Any
+
+from nicesql.engine import add_db, register_engine
+from nicesql.engine.base import Engine, Result
 from nicesql.shortcut import insert, delete, update, select, ddl
 
 
+class DummyEngine(Engine):
+    def __init__(self, **kwargs):
+        pass
+
+    def execute(self, nsql: str, params: Any) -> Result:
+        # noinspection PyTypeChecker
+        result = Result((nsql, params), (nsql, params), (nsql, params))
+        return result
+
+
 def setup_module():
-    reg_engine("dummy:///dummy")
+    register_engine(dummy=DummyEngine)
+    add_db(default="dummy:///dummy")
 
 
 # noinspection DuplicatedCode, PyMethodMayBeStatic, PyShadowingBuiltins
@@ -55,5 +69,5 @@ def func_delete(a, b):
 
 def test_delete():
     sql, params = func_delete(a=1, b="%2%")
-    assert sql == "delete from dummy where a=? and b like ?"
-    assert params == [1, "%2%"]
+    assert sql == "delete from dummy where a={a} and b like {b}"
+    assert params == {"a": 1, "b": "%2%"}

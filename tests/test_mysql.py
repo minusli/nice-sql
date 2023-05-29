@@ -1,6 +1,6 @@
 from typing import List
 
-from nicesql.engine import reg_engine
+from nicesql.engine import add_db
 from nicesql.shortcut.annotate import insert, delete, update, select, ddl
 
 
@@ -11,7 +11,7 @@ class Person:
 
 
 def setup_module():
-    reg_engine("mysql://localhost/test?user=test&password=test", alias="mysql")
+    add_db(mysql="mysql://localhost/test?user=test&password=test")
     create_table()
 
 

@@ -1,14 +1,14 @@
 import inspect
 from typing import Callable, Any
 
-from nicesql.engine import get_engine
+from nicesql.engine import get_db
 from nicesql.engine.base import Result
 
 ResultProcessor = Callable[[Result], Any]
 
 
 def execute(nsql: str, engine='default', **kwargs) -> Result:
-    return get_engine(alias=engine).execute(nsql, kwargs)
+    return get_db(alias=engine).execute(nsql, kwargs)
 
 
 def bind(nsql: str, engine: str = 'default', processor: ResultProcessor = None):
@@ -29,7 +29,7 @@ def bind(nsql: str, engine: str = 'default', processor: ResultProcessor = None):
                     kwargs.update(_value)
                 else:
                     kwargs[_name] = _value
-            result = get_engine(alias=engine).execute(nsql, kwargs)
+            result = get_db(alias=engine).execute(nsql, kwargs)
             if processor:
                 return processor(result)
             return result

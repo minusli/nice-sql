@@ -6,11 +6,7 @@ from nicesql.utils import fill_model
 
 class Engine(metaclass=ABCMeta):
     @abstractmethod
-    def init(self, **kwargs):
-        pass
-
-    @abstractmethod
-    def execute(self, nsql: str, data: any) -> "Result":
+    def execute(self, nsql: str, data: Any) -> "Result":
         pass
 
 
