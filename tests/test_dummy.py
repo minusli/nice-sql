@@ -1,8 +1,8 @@
 from typing import Any
 
+from nicesql.engine import Engine, Result
 from nicesql.engine import add_db, register_engine
-from nicesql.engine.base import Engine, Result
-from nicesql.shortcut import insert, delete, update, select, ddl
+from nicesql.shortcut import insert, delete, update, select, sql as sql_
 
 
 class DummyEngine(Engine):
@@ -36,29 +36,29 @@ class TestShortcuts:
     def sta_update(a, b=(1, 2, 3)):
         pass
 
-    @ddl("create table() a={c}")
-    def bind(self, a=1, b=2, c=3):
+    @sql_("create table() a={c}")
+    def ddl(self, a=1, b=2, c=3):
         pass
 
     def test_insert(self):
         sql, params = self.self_insert(1, "2")
-        assert sql == "insert into dummy(a, b, c) values({a}, {b}, {c})"
-        assert params == {"self": self, "b": 1, "a": "2", "c": 1}
+        assert sql == "insert into dummy(a, b, c) values(?, ?, ?)"
+        assert params == ['2', 1, 1]
 
     def test_select(self):
         sql, params = self.cls_select(1, b="2", c=[1, "2"])
-        assert sql == "select * from dummy where a={a} AND b={b} OR c={c}"
-        assert params == {"cls": type(self), "a": 1, "b": "2", "c": [1, "2"]}
+        assert sql == "select * from dummy where a=? AND b=? OR c=?,?"
+        assert params == [1, '2', 1, '2']
 
     def test_update(self):
         sql, params = self.sta_update(1)
-        assert sql == "update dummy set a={a} where b in {b}"
-        assert params == {"a": 1, "b": (1, 2, 3)}
+        assert sql == "update dummy set a=? where b in ?,?,?"
+        assert params == [1, 1, 2, 3]
 
     def test_bind(self):
-        sql, params = self.bind().insertid()
-        assert sql == "create table() a={c}"
-        assert params == {"a": 1, "b": 2, "c": 3, "self": self}
+        sql, params = self.ddl().insertid()
+        assert sql == "create table() a=?"
+        assert params == [3]
 
 
 # noinspection PyUnusedLocal
@@ -69,5 +69,5 @@ def func_delete(a, b):
 
 def test_delete():
     sql, params = func_delete(a=1, b="%2%")
-    assert sql == "delete from dummy where a={a} and b like {b}"
-    assert params == {"a": 1, "b": "%2%"}
+    assert sql == "delete from dummy where a=? and b like ?"
+    assert params == [1, "%2%"]

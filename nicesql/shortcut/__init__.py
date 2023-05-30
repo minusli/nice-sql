@@ -1,2 +1,1 @@
-from nicesql.shortcut.annotate import select, update, insert, delete, ddl
-from nicesql.shortcut.core import execute
+from nicesql.shortcut._shortcut import select, update, insert, delete, ddl, sql

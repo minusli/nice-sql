@@ -1,7 +1,7 @@
 from typing import List
 
 from nicesql.engine import add_db
-from nicesql.shortcut.annotate import insert, delete, update, select, ddl
+from nicesql.shortcut import insert, delete, update, select, ddl
 
 
 class Person:
@@ -24,39 +24,39 @@ create table if not exists person(
     id      integer not null primary key,
     name    varchar(127)
 )
-""", engine="sqlite")
+""").db("sqlite")
 def create_table():
     pass
 
 
-@ddl("drop table if exists person", engine="sqlite")
+@ddl("drop table if exists person").db('sqlite')
 def drop_table():
     pass
 
 
 # noinspection DuplicatedCode, PyMethodMayBeStatic, PyShadowingBuiltins
 class TestSqlite:
-    @insert("insert into person(name) values({name})", engine="sqlite")
+    @insert("insert into person(name) values({name})").db('sqlite')
     def insert(self, name: str) -> int | str:
         pass
 
-    @delete("delete from person where id={id}", engine="sqlite")
+    @delete("delete from person where id={id}").db('sqlite')
     def delete(self, id: int) -> int:
         pass
 
-    @update("update person set name={name} where id={id}", engine="sqlite")
+    @update("update person set name={name} where id={id}").db('sqlite')
     def update(self, id: int, name: str) -> int:
         pass
 
-    @select("select * from person where id={ id }", model=Person, first=True, engine="sqlite")
+    @select("select * from person where id={ id }").db('sqlite').first(Person)
     def get(self, id: int) -> Person:
         pass
 
-    @select("select * from person where id in ({ ids })", model=Person, engine="sqlite")
+    @select("select * from person where id in ({ ids })").db('sqlite').model(Person)
     def gets(self, *ids: int) -> List[Person]:
         pass
 
-    @select("select * from person where name like { name }", model=Person, engine="sqlite")
+    @select("select * from person where name like { name }").db('sqlite').model(Person)
     def find(self, name: str) -> List[Person]:
         pass
 
