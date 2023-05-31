@@ -1,117 +1,119 @@
-# nicesql User Guide
+# 使用手册
 
 ------
 
-### Talk is cheap. Show me the code
+# 如何安装？
+
+`pip install nice-sql==2.0.0`
+
+# 如何使用？
+
+### Step 1: 添加 db 配置
 
 ```python
-"""
-sqlite example
+from nicesql.engine import add_db
 
- --------------------
-丨     person        丨
- --------------------
-丨 id        int     丨
-丨 name      string  丨
- --------------------
-"""
+if __name__ == '__main__':
+    add_db("mysql://localhost:3306/test_db?user=test&password=test&charset=utf8mb4")
+```
 
-from typing import List
+### step2: 执行 sql
 
-from nicesql.engine import reg_engine
-from nicesql.shortcut.annotate import insert, delete, update, select, ddl
+```python
+from nicesql.shortcut import select, update, insert, delete, ddl
 
 
-class Person:
+# 方式 1：直接查询
+def way1():
+    result = select("select * from t where a={a} and b in (?)", {"a": 1, "b": ["1", "2"]}).execute()
+
+
+# 方式 2：装饰器查询
+@select("select * from t where a={a}")
+def get(a=1):
+    pass
+
+
+def way2():
+    return get(2)
+
+```
+
+### 扩展功能
+
+- 支持控制返回数据模型:
+
+```python
+from nicesql.shortcut import select
+
+
+class User:
     def __init__(self):
         self.id = None
         self.name = None
 
 
-def setup_module():
-    reg_engine("mysql://localhost/test?user=test&password=test", alias="mysql")
-    create_table()
+if __name__ == '__main__':
+    # 使用 model(T) 方法设置数据模型
+    users = select("select * from user where id in ({ids})", {"ids": [1, 2, 3]}).model(User).execute()
+```
+
+- 支持 sql 中扩展列表:
+
+```sql
+/*
+ids 对应的传参，可以是列表，会被展开成  v1,v2,v3...
+但只会展开第一层，不支持递归展开
+*/
+select *
+from t
+where id in ({ids})
+```
+
+- 支持返回第 1 条数据:
+
+```python
+from nicesql.shortcut import select
 
 
-def teardown_module():
-    drop_table()
+class User:
+    def __init__(self):
+        self.id = None
+        self.name = None
 
 
-@ddl("""
-create table if not exists person(
-    id      integer not null primary key AUTO_INCREMENT,
-    name    varchar(127)
-)
-""", engine="mysql")
-def create_table():
-    pass
+if __name__ == '__main__':
+    # 使用 first(T=None) 控制只获取第一条数据, 同时也可以设置 model
+    user = select("select * from user where id={id}", {"id": 1}).first(User).execute()
+```
+
+- 支持设置多 DB
+
+```python
+from nicesql.engine import add_db
+
+if __name__ == '__main__':
+    # 通过设置别名参数，创建多个 db；
+    add_db("mysql://localhost:3306/test1", "db1")
+    add_db("mysql://localhost:3306/test2", "db2")
+
+    # 使用是通过 db(alias) 指定需要使用的 db 
+    from nicesql.shortcut import insert
+
+    insert("insert into t(name) values({name})", {"name": "hello"}).db("db1").execute()
+```
+
+- 占位符支持递归查询，同时支持管道进行数据处理
+
+```python
+from nicesql.shortcut import select
 
 
-@ddl("drop table if exists person", engine="mysql")
-def drop_table():
-    pass
+class User:
+    def __init__(self):
+        self.id = 5
 
 
-# noinspection DuplicatedCode, PyMethodMayBeStatic, PyShadowingBuiltins
-class TestMysql:
-    @insert("insert into person(name) values({name})", engine="mysql")
-    def insert(self, name: str) -> int | str:
-        pass
-
-    @delete("delete from person where id={id}", engine="mysql")
-    def delete(self, id: int) -> int:
-        pass
-
-    @update("update person set name={name} where id={id}", engine="mysql")
-    def update(self, id: int, name: str) -> int:
-        pass
-
-    @select("select * from person where id={ id }", model=Person, first=True, engine="mysql")
-    def get(self, id: int) -> Person:
-        pass
-
-    @select("select * from person where id in ({ ids })", model=Person, engine="mysql")
-    def gets(self, *ids: int) -> List[Person]:
-        pass
-
-    @select("select * from person where name like { name }", model=Person, engine="mysql")
-    def find(self, name: str) -> List[Person]:
-        pass
-
-    def test_insert(self):
-        name = "insert001"
-        new_id = self.insert(name)
-
-        person = self.get(new_id)
-        assert person
-        assert person.name == name
-
-    def test_delete(self):
-        name = "delete001"
-        new_id = self.insert(name)
-        assert self.delete(new_id) == 1
-
-        person = self.get(new_id)
-        assert person is None
-
-    def test_update(self):
-        name = "update001"
-        update_name = "update002"
-        new_id = self.insert(name)
-        assert self.update(new_id, update_name) == 1
-        person = self.get(new_id)
-        assert person
-        assert person.name == update_name
-
-    def test_gets(self):
-        name1 = "gets001"
-        name2 = "gets002"
-        id1 = self.insert(name1)
-        id2 = self.insert(name2)
-        persons = self.gets(id1, id2)
-        assert len(persons) == 2
-        assert persons[0].id == id1
-        assert persons[1].id == id2
-        assert persons[0].name == name1
-        assert persons[1].name == name2
+if __name__ == '__main__':
+    select("select * from t where id={user.id|str}", {"user": User()})
 ```

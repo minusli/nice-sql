@@ -10,10 +10,10 @@ with open("README.md", "r") as fh:
 
 setup(
     name='nice-sql',
-    version='1.0.0',
+    version='2.0.0',
     author='minusli',
     author_email='minusli@foxmail.com',
-    url='https://github.com/657143946/nicesql',
+    url='https://github.com/minusli/nicesql',
     description='easy nice sql: decorator with sql',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -22,7 +22,8 @@ setup(
     install_requires=[
         "pytest",
         "pymysql",
-        "DBUtils"
+        "DBUtils",
+        "nice-datapath==0.0.1",
     ],
     entry_points={},
     license="Apache License 2.0"

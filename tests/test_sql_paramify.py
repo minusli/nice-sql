@@ -16,8 +16,8 @@ class DummyEngine(Engine):
 
 
 def setup_module():
-    register_engine(dummy=DummyEngine)
-    add_db(default="dummy:///dummy")
+    register_engine("dummy", DummyEngine)
+    add_db("dummy:///dummy")
 
 
 # noinspection DuplicatedCode, PyMethodMayBeStatic, PyShadowingBuiltins

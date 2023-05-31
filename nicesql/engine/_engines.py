@@ -24,12 +24,10 @@ class MysqlEngine(Engine):
         database = kwargs.get('database')
         user = kwargs.get("user")
         password = kwargs.get("password")
-        maxconnections = kwargs.get("maxconnections")
         charset = kwargs.get("charset", "utf8mb4")
 
         self.pool = PooledDB(creator=pymysql, host=host, port=port, database=database, user=user, password=password,
-                             maxconnections=maxconnections, blocking=True, setsession=['SET AUTOCOMMIT = 1'],
-                             cursorclass=pymysql.cursors.DictCursor, charset=charset)
+                             blocking=True, setsession=['SET AUTOCOMMIT = 1'], cursorclass=pymysql.cursors.DictCursor, charset=charset)
 
     def execute(self, sql: str, params: List[Any]) -> Result:
         sql = sql.replace("?", "%s")  # 占位符替换
@@ -49,8 +47,6 @@ class SqliteEngine(Engine):
         database = kwargs.get('database')
         self.conn = sqlite3.connect(database, isolation_level=None, check_same_thread=False)
         self.conn.row_factory = _sqlite3_row2dict_factory
-        if kwargs.get("debug", "").lower() == "true":
-            self.conn.set_trace_callback(lambda sql: print(f"SQL: {sql}"))
         self.lock = threading.Lock()
 
     def execute(self, sql: str, params: List[Any]) -> Result:

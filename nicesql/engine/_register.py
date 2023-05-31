@@ -4,7 +4,7 @@ from urllib.parse import urlparse, parse_qs
 
 from nicesql.engine import Engine
 from nicesql.engine._engines import MysqlEngine, SqliteEngine
-from nicesql.utils.error import NotFoundError, UnsupportedError
+from nicesql.utils.error import NotFoundError, UnsupportedError, DuplicateError
 
 __databases: Dict[str, Engine] = {}
 __engines: Dict[str, Type[Engine]] = {
@@ -13,20 +13,20 @@ __engines: Dict[str, Type[Engine]] = {
 }
 
 
-def register_engine(**kwargs: Type[Engine]):
-    for schema, engine in kwargs.items():
-        __engines[schema.strip()] = engine
+def register_engine(schema: str, engine: Type[Engine]):
+    __engines[schema] = engine
 
 
-def add_db(**kwargs: str):
-    for alias, url in kwargs.items():
-        params = parse_db_url(url)
-        engine = __engines.get(params["type"])
-        if not engine:
-            raise UnsupportedError(f'engine unsupported: type={params["type"]}')
+def add_db(url: str, alias: str = "default"):
+    if alias in __databases:
+        raise DuplicateError(f"duplicate db: alias={alias}")
+    params = parse_db_url(url)
+    engine = __engines.get(params["type"])
+    if not engine:
+        raise UnsupportedError(f'engine unsupported: type={params["type"]}')
 
-        # noinspection PyArgumentList
-        __databases[alias] = engine(**params)
+    # noinspection PyArgumentList
+    __databases[alias] = engine(**params)
 
 
 def get_db(alias="default") -> Engine:
@@ -34,6 +34,11 @@ def get_db(alias="default") -> Engine:
         raise NotFoundError(f'db not found: alias={alias}')
 
     return __databases[alias]
+
+
+def remove_db(alias: str = "default"):
+    if alias in __databases:
+        __databases.pop(alias)
 
 
 def parse_db_url(url: str) -> Dict[str, str | int]:
