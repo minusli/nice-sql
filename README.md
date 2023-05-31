@@ -25,7 +25,7 @@ from nicesql.shortcut import select, update, insert, delete, ddl
 
 # 方式 1：直接查询
 def way1():
-    result = select("select * from t where a={a} and b in (?)", {"a": 1, "b": ["1", "2"]}).execute()
+    result = select("select * from t where a={a} and b in ({b})", {"a": 1, "b": ["1", "2"]}).execute()
 
 
 # 方式 2：装饰器查询
