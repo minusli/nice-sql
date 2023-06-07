@@ -11,21 +11,21 @@
 ### Step 1: 添加 db 配置
 
 ```python
-from nicesql.engine import add_db
+from nicesql.db import add_db
 
 if __name__ == '__main__':
-    add_db("mysql://localhost:3306/test_db?user=test&password=test&charset=utf8mb4")
+    add_db("mysql://test:test@localhost:3306/test_db?charset=utf8mb4")
 ```
 
 ### step2: 执行 sql
 
 ```python
-from nicesql.shortcut import select, update, insert, delete, ddl
+from nicesql.shortcut import select, update, insert, delete, sql
 
 
 # 方式 1：直接查询
 def way1():
-    result = select("select * from t where a={a} and b in ({b})", {"a": 1, "b": ["1", "2"]}).execute()
+    result = select("select * from t where a={a} and b in ({b})", a=1, b=["1", "2"]).execute()
 
 
 # 方式 2：装饰器查询
@@ -55,7 +55,7 @@ class User:
 
 if __name__ == '__main__':
     # 使用 model(T) 方法设置数据模型
-    users = select("select * from user where id in ({ids})", {"ids": [1, 2, 3]}).model(User).execute()
+    users = select("select * from user where id in ({ids})", id=[1, 2, 3]).model(User).execute()
 ```
 
 - 支持 sql 中扩展列表:
@@ -84,23 +84,23 @@ class User:
 
 if __name__ == '__main__':
     # 使用 first(T=None) 控制只获取第一条数据, 同时也可以设置 model
-    user = select("select * from user where id={id}", {"id": 1}).first(User).execute()
+    user = select("select * from user where id={id}", id=1).first(User).execute()
 ```
 
 - 支持设置多 DB
 
 ```python
-from nicesql.engine import add_db
+from nicesql.db import add_db
 
 if __name__ == '__main__':
     # 通过设置别名参数，创建多个 db；
-    add_db("mysql://localhost:3306/test1", "db1")
-    add_db("mysql://localhost:3306/test2", "db2")
+    add_db("mysql://username:password@localhost:3306/test1", "db1")
+    add_db("mysql://username:passwprd@localhost:3306/test2", "db2")
 
     # 使用是通过 db(alias) 指定需要使用的 db 
     from nicesql.shortcut import insert
 
-    insert("insert into t(name) values({name})", {"name": "hello"}).db("db1").execute()
+    insert("insert into t(name) values({name})", name="hello").db("db1").execute()
 ```
 
 - 占位符支持递归查询，同时支持管道进行数据处理
@@ -115,5 +115,5 @@ class User:
 
 
 if __name__ == '__main__':
-    select("select * from t where id={user.id|str}", {"user": User()})
+    select("select * from t where id={user.id|str}", user=User())
 ```
