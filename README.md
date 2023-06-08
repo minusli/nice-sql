@@ -4,7 +4,7 @@
 
 # 如何安装？
 
-`pip install nice-sql==2.0.0`
+`pip install nice-sql==3.0.1`
 
 # 如何使用？
 

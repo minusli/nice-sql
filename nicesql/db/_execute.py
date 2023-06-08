@@ -18,6 +18,7 @@ def execute(sql: str, db: str = "default", **kwargs) -> Result:
         return _execute(conn, sql, params)
 
     conn = get_db(db).connection()
+    conn.begin()
     try:
         result = _execute(conn, sql, params)
         conn.commit()
@@ -51,6 +52,7 @@ def transaction(db="default"):
                 return fn(*args, **kwargs)
 
             conn = get_db(db).connection()
+            conn.begin()
             try:
                 tls.put(_TLS_KEY_OF_CONNECTION.format(db), conn)
                 r = fn(*args, **kwargs)

@@ -1,7 +1,8 @@
 from typing import List, Dict, Any
 
-import pymysql.cursors
+import pymysql
 from dbutils.pooled_db import PooledDB, PooledSharedDBConnection, PooledDedicatedDBConnection
+from pymysql.cursors import Cursor, DictCursor
 
 from nicesql.db._driver import LiteDriver, LiteConnection, LiteCursor
 
@@ -14,7 +15,7 @@ class Mysql(LiteDriver):
         charset = self.get_charset()
 
         self.pool = PooledDB(creator=pymysql, host=self.hostname, port=self.port, database=self.database, user=self.username, password=self.password,
-                             blocking=True, cursorclass=pymysql.cursors.DictCursor, charset=charset, autocommit=autocommit)
+                             blocking=True, cursorclass=DictCursor, charset=charset, autocommit=autocommit)
 
     def connection(self) -> "LiteConnection":
         return MysqlConnection(self.pool.connection())
@@ -47,7 +48,7 @@ class MysqlConnection(LiteConnection):
 
 
 class MysqlCursor(LiteCursor):
-    def __init__(self, cursor):
+    def __init__(self, cursor: Cursor):
         self.cursor = cursor
 
     def execute(self, sql: str, params: List[Any]):
@@ -61,6 +62,7 @@ class MysqlCursor(LiteCursor):
         return self.cursor.rowcount
 
     def fetchall(self) -> List[Dict[str, Any]]:
+        # noinspection PyTypeChecker
         return self.cursor.fetchall()
 
     def close(self):

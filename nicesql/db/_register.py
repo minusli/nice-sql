@@ -4,10 +4,12 @@ import dsnparse
 
 from nicesql.db._driver import LiteDriver
 from nicesql.db._driver_mysql import Mysql
+from nicesql.db._driver_sqlite import Sqlite
 
 __dbs: Dict[str, LiteDriver] = {}
 __dbtypes: Dict[str, Type[LiteDriver]] = {
-    "mysql": Mysql
+    "mysql": Mysql,
+    "sqlite": Sqlite
 }
 
 
@@ -45,7 +47,7 @@ def _parse_dsn(dsn: str) -> _DSN:
         password=dsn.password,
         hostname=dsn.hostname,
         port=dsn.port,
-        database=dsn.database,
+        database=dsn.database.strip("/") if dsn.database else dsn.database,
         params=dsn.query_params
     )
 
